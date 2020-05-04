@@ -17,19 +17,36 @@ class HashTable:
     Implement this.
     """
 
-    def fnv1(self, key):
+    def __init__(self, length):
+        self.array = [None] * length
+        
+
+    def fnv1(self, key, seed=0):
         """
         FNV-1 64-bit hash function
         """
-        self.FNV_prime = 1099511628211
-        
+        # Constants
+        fnv_prime = 1099511628211
+        offset_basis = 14695981039346656037
+
+        # FNV1 hashing function
+        hash = offset_basis + seed
+        for char in key:
+            hash = hash * fnv_prime
+            hash = hash ^ ord(char)
+        return hash
 
     def djb2(self, key):
         """
         DJB2 32-bit hash function
-
-        Implement this, and/or FNV-1.
         """
+        # Constant (a high prime number)
+        hash = 5381
+
+        # DJB2 hashing
+        for char in key:
+            hash = (hash * 33) + ord(char)
+        return hash
 
     def hash_index(self, key):
         """
