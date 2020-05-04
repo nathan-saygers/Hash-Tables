@@ -20,9 +20,9 @@ class HashTable:
     def fnv1(self, key):
         """
         FNV-1 64-bit hash function
-
-        Implement this, and/or DJB2.
         """
+        self.FNV_prime = 1099511628211
+        
 
     def djb2(self, key):
         """
