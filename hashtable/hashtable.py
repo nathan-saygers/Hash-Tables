@@ -7,11 +7,22 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
-    def traverse_to_next(self, entry):
+    def get_last_entry(self, entry):
         if entry.next != None:
-            return self.traverse_to_next(entry.next)
+            return self.get_last_entry(entry.next)
         else:
             return entry
+
+    def find_entry(self, key):
+        current = self
+
+        while current != None:
+            if current.key == key:
+                return current
+
+            current = current.next
+
+        return None
 
 
 class HashTable:
@@ -61,47 +72,50 @@ class HashTable:
         return self.djb2(key) % self.length
 
     def put(self, key, value):
-        #Store the value with the given key
+        # Find the hash index
         index = self.hash_index(key)
-        print('index', index)
-        print("boo", self.storage)
-        value_at_index = self.storage[index]
-
-        if value_at_index:
-            print('value at index in put', value_at_index.value,
-                  value_at_index.next)
-            # Hash collisions should be handled with Linked List Chaining
-            if value_at_index.next == None:
-                value_at_index.next = HashTableEntry(key, value)
-                #print('TableEntry if value_index.next is none', self.storage)
+        # print(index)
+        list_at_index = self.storage[index]
+        # If the index in storage has a list
+        if list_at_index != None:
+            # Search the list for the key
+            searched_entry = list_at_index.find_entry(key)
+            # If it's there, replace the value
+            if searched_entry != None:
+                searched_entry.key = key
+                searched_entry.value = value
+                # print("searched entry", searched_entry.value)
+            # If it's not, append a new record to the list
             else:
-                last_entry = value_at_index.traverse_to_next(value_at_index)
+                last_entry = list_at_index.get_last_entry(list_at_index)
                 last_entry.next = HashTableEntry(key, value)
-                #print(
-                # "having to traverse the linked list, value at last entry",
-                # self.storage)
+                # print("last entry.next", last_entry.next)
+        # Else if the index has no list, start a new one at that index
         else:
             new_entry = HashTableEntry(key, value)
             self.storage[index] = new_entry
-            print("affer inster", self.storage)
-            #print('there was no value at index, printing new entry',
+            # print("index:", index, "new_entry:", new_entry)
 
     def delete(self, key):
         """
-        Remove the value stored with the given key.
-        Print a warning if the key is not found.
+        Find the hash index
+        Search the list for the key
+        If found, delete the node from the list, (return the node or value?)
+        Else return None
         """
         index = hash_index(key)
-        self.storage[index] = None
+        to_be_deleted = self.storage[index].find_entry(key)
 
     def get(self, key):
         """
-        Retrieve the value stored with the given key.
-
-        Returns None if the key is not found.
+        Find the hash index
+        Search the list for the key
+        If found, return the value
+        Else return None
         """
         index = self.hash_index(key)
-        return self.storage[index].value
+
+        return self.storage[index].find_entry(key).value
 
     def resize(self):
         """
@@ -113,24 +127,24 @@ class HashTable:
 
 
 if __name__ == "__main__":
-    test_list = HashTableEntry("foo", 1)
-    test_list.next = HashTableEntry("bar", 2)
-    test_list.next.next = HashTableEntry("baz", 3)
-    test_list.next.next.next = HashTableEntry("blam", 4)
+    # test_list = HashTableEntry("one", 1)
+    # test_list.next = HashTableEntry("two", 2)
+    # test_list.next.next = HashTableEntry("three", 3)
+    # test_list.next.next.next = HashTableEntry("four", 4)
 
-    print(test_list.traverse_to_next(test_list).key)
+    # print(test_list.find_entry("five"))
 
-    # ht = HashTable(2)
+    ht = HashTable(2)
 
-    # ht.put("line_1", "Tiny hash table")
-    # ht.put("line_2", "Filled to capacity")
-    # ht.put("line_3", "Linked list saves the day!")
+    ht.put("line_1", "Tiny hash table")
+    ht.put("line_2", "Filled to capacity")
+    ht.put("line_3", "Now it's different")
 
-    # # Test storing beyond capacity
-    # print("Test storing beyond capacity")
-    # print(ht.get("line_1"))
-    # print(ht.get("line_2"))
-    # print(ht.get("line_3"))
+    # Test storing beyond capacity
+    print("Test storing beyond capacity")
+    print(ht.get("line_1").value)
+    print(ht.get("line_2").value)
+    print(ht.get("line_3").value)
 
     # # Test resizing
     # old_capacity = len(ht.storage)
