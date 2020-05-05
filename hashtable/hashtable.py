@@ -103,8 +103,14 @@ class HashTable:
         If found, delete the node from the list, (return the node or value?)
         Else return None
         """
-        index = hash_index(key)
+        index = self.hash_index(key)
         to_be_deleted = self.storage[index].find_entry(key)
+
+        if to_be_deleted != None:
+            to_be_deleted.key = None
+            to_be_deleted.value = None
+
+        return None
 
     def get(self, key):
         """
@@ -114,8 +120,9 @@ class HashTable:
         Else return None
         """
         index = self.hash_index(key)
-
-        return self.storage[index].find_entry(key).value
+        if self.storage[index].key != None:
+            return self.storage[index].find_entry(key).value
+        return None
 
     def resize(self):
         """
