@@ -35,6 +35,7 @@ class HashTable:
     def __init__(self, length):
         self.storage = [None] * length
         self.length = length
+        self.el_count = 0
 
     def fnv1(self, key, seed=0):
         """
@@ -89,11 +90,40 @@ class HashTable:
             else:
                 last_entry = list_at_index.get_last_entry(list_at_index)
                 last_entry.next = HashTableEntry(key, value)
+                self.el_count += 1
+                self.resize()
                 # print("last entry.next", last_entry.next)
         # Else if the index has no list, start a new one at that index
         else:
             new_entry = HashTableEntry(key, value)
             self.storage[index] = new_entry
+            self.el_count += 1
+            self.resize()
+            # print("index:", index, "new_entry:", new_entry)
+
+    def transfer_put(self, key, value, destination):
+        # Find the hash index
+        index = self.hash_index(key)
+        # print(index)
+        list_at_index = destination[index]
+        # If the index in storage has a list
+        if list_at_index != None:
+            # Search the list for the key
+            searched_entry = list_at_index.find_entry(key)
+            # If it's there, replace the value
+            if searched_entry != None:
+                searched_entry.key = key
+                searched_entry.value = value
+                # print("searched entry", searched_entry.value)
+            # If it's not, append a new record to the list
+            else:
+                last_entry = list_at_index.get_last_entry(list_at_index)
+                last_entry.next = HashTableEntry(key, value)
+                # print("last entry.next", last_entry.next)
+        # Else if the index has no list, start a new one at that index
+        else:
+            new_entry = HashTableEntry(key, value)
+            destination[index] = new_entry
             # print("index:", index, "new_entry:", new_entry)
 
     def delete(self, key):
@@ -109,6 +139,8 @@ class HashTable:
         if to_be_deleted != None:
             to_be_deleted.key = None
             to_be_deleted.value = None
+            self.el_count -= 1
+            self.resize()
 
         return None
 
@@ -128,30 +160,66 @@ class HashTable:
         """
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
-
-        Implement this.
         """
+        #  If load is greater than .7
+        if (self.el_count / self.length) >= .7:
+            # Create a new table (with capacity length * 2)that will be future storage
+            new_storage = [None] * (self.length * 2)
+            self.length *= 2
+            # Loop over every element in the array
+            for el in self.storage:
+                # If there is a node at el
+                current = el
+                while current != None:
+                    # If the element is key/value is not None hash into the new table
+                    if current.key != None:
+                        self.transfer_put(current.key, current.value,
+                                          new_storage)
+                    current = current.next
+            self.storage = new_storage
+        # ElIf the load is less than .2 AND (length / 2) > minimum length
+        if (self.el_count / self.length) < .2 and (self.length / 2) > 8:
+            # Create a new table (with capacity length / 2)that will be future storage
+            new_storage = [None] * (self.length / 2)
+            self.length /= 2
+            # Loop over every element in the array
+            for el in self.storage:
+                # If the element is key/value is not None hash into the new table
+                current = el
+                while current != None:
+                    # If the element is key/value is not None hash into the new table
+                    if current.key != None:
+                        self.transfer_put(current.key, current.value,
+                                          new_storage)
+                    current = current.next
+            self.storage = new_storage
+        # ELSE: do nothing
 
 
 if __name__ == "__main__":
-    # test_list = HashTableEntry("one", 1)
-    # test_list.next = HashTableEntry("two", 2)
-    # test_list.next.next = HashTableEntry("three", 3)
-    # test_list.next.next.next = HashTableEntry("four", 4)
+    test_list = HashTableEntry("one", 1)
+    test_list.next = HashTableEntry("two", 2)
+    test_list.next.next = HashTableEntry("three", 3)
+    test_list.next.next.next = HashTableEntry("four", 4)
 
-    # print(test_list.find_entry("five"))
+    print(test_list.find_entry("four"))
 
-    ht = HashTable(2)
+    def print_this(value):
+        print(value)
 
-    ht.put("line_1", "Tiny hash table")
-    ht.put("line_2", "Filled to capacity")
-    ht.put("line_3", "Now it's different")
+    test_list.for_each(print_this)
 
-    # Test storing beyond capacity
-    print("Test storing beyond capacity")
-    print(ht.get("line_1").value)
-    print(ht.get("line_2").value)
-    print(ht.get("line_3").value)
+    # ht = HashTable(3)
+
+    # ht.put("line_1", "Tiny hash table")
+    # ht.put("line_2", "Filled to capacity")
+    # ht.put("line_3", "Now it's different")
+
+    # # Test storing beyond capacity
+    # print("Test storing beyond capacity")
+    # print(ht.get("line_1"))
+    # print(ht.get("line_2"))
+    # print(ht.get("line_3"))
 
     # # Test resizing
     # old_capacity = len(ht.storage)
