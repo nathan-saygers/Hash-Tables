@@ -1,5 +1,16 @@
 def no_dups(s):
-    # Implement me.
+    # declare a dictionary
+    dupless_dict = {}
+    # split string on spaces to get array of words
+    word_arr = s.split(" ")
+    # loop over words arr
+    for word in word_arr:
+        # If the word doesn't exist in the dictionary, add it
+        if dupless_dict.get(word) == None:
+            dupless_dict[word] = 1
+    # return the keys of the dictionary
+    result = " ".join(list(dupless_dict.keys()))
+    return result
 
 
 if __name__ == "__main__":
