@@ -1,6 +1,7 @@
 import math
 import random
 
+
 def slowfun(x, y):
     # TODO: Modify to produce the same results, but much faster
     v = math.pow(x, y)
@@ -17,3 +18,16 @@ for i in range(50000):
     x = random.randrange(2, 14)
     y = random.randrange(3, 6)
     print(f'{i}: {x},{y}: {slowfun(x, y)}')
+
+# Lookup table example:
+
+# import math
+# cache = {}
+
+# def build_lookup_table():
+#     for i in range(1, 1000):
+#         inv_squar_root(i)
+
+# def inv_squar_root(n):
+#     if n not in cache:
+#         cache[n] = 1 / math.sqrt
